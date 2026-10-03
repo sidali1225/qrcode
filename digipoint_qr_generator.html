@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DigiPoint QR Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:16px;background:#eef3f9;font:14px Arial,sans-serif;color:#17283d}#app{max-width:1100px;margin:auto;border:1px solid #d9e3ef;border-radius:18px;overflow:hidden;background:#f5f8fc;box-shadow:0 8px 28px #17283d18}header{background:#17283d;color:white;text-align:center;padding:22px}h1{margin:0;font-size:25px}h1 span{color:#55a5ff}.sub{margin:8px 0 0;color:#d4e4f5}.tabs{display:flex;gap:7px;flex-wrap:wrap;padding:13px;background:#eaf1fa}.tab{padding:10px 14px;border:1px solid #d5e1ef;border-radius:8px;background:white;color:#425a75;font-weight:bold;cursor:pointer}.tab.active{background:#1877d2;color:white}.layout{display:grid;grid-template-columns:1.3fr .9fr;gap:16px;padding:16px}.panel{background:white;border:1px solid #dce5ef;border-radius:13px;padding:18px;min-width:0}.title{font-weight:bold;font-size:16px;margin:0 0 16px}.field{margin-bottom:14px}label{display:block;font-size:12px;font-weight:bold;color:#425a75;margin-bottom:6px}input:not([type=color]):not([type=checkbox]):not([type=file]),textarea,select{width:100%;padding:11px;border:1px solid #cbd7e5;border-radius:8px;background:#fbfdff;font:inherit;color:#17283d}textarea{min-height:90px}.hidden{display:none!important}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.color{display:flex;align-items:center;gap:8px;border:1px solid #dce5ef;border-radius:8px;padding:6px}.color input{width:35px;height:30px;border:0}.hint{font-size:11px;color:#8290a2;line-height:1.5;margin:5px 0}.check{display:flex;gap:7px;align-items:center;font-size:12px;color:#53677f}.preview{text-align:center}.area{min-height:280px;background:#f4f7fb;border:1px dashed #cbd8e8;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:15px}canvas{max-width:100%;height:auto}.status{min-height:22px;color:#64748b;font-size:12px;margin:12px 0}.error{color:#c2410c}.btn{width:100%;padding:13px;border:0;border-radius:9px;font-weight:bold;cursor:pointer;margin:4px 0}.primary{background:#1877d2;color:white}.secondary{background:#eaf3ff;color:#315f94;border:1px solid #c9def5}.btn:disabled{opacity:.45;cursor:not-allowed}footer{text-align:center;color:#8290a2;font-size:11px;padding:0 12px 16px}@media(max-width:720px){body{padding:6px}.layout{grid-template-columns:1fr;padding:10px}.tabs{padding:9px}.tab{flex:1 1 40%}}
+</style></head><body><div id="app"><header><h1>DigiPoint <span>QR</span></h1><p class="sub">Create, customize, and download your QR code</p></header>
+<nav class="tabs"><button class="tab active" data-type="url">🌐 Website</button><button class="tab" data-type="text">✎ Text</button><button class="tab" data-type="wifi">◉ Wi-Fi</button><button class="tab" data-type="contact">▣ Contact</button><button class="tab" data-type="email">✉ Email</button></nav>
+<div class="layout"><section class="panel"><h2 class="title">Content</h2>
+<div class="field" data-fields="url"><label>Website URL</label><input id="url" placeholder="https://www.example.com"></div>
+<div class="field hidden" data-fields="text"><label>Your text</label><textarea id="text" placeholder="Type your message..."></textarea></div>
+<div class="hidden" data-fields="wifi"><div class="field"><label>Wi-Fi name (SSID)</label><input id="ssid"></div><div class="field"><label>Password</label><input id="pass" type="text"></div><div class="field"><label>Security</label><select id="security"><option value="WPA">WPA/WPA2/WPA3</option><option value="WEP">WEP</option><option value="nopass">No password</option></select></div><label class="check"><input id="hiddenWifi" type="checkbox"> Hidden network</label></div>
+<div class="hidden" data-fields="contact"><div class="field"><label>Full name</label><input id="name"></div><div class="field"><label>Phone</label><input id="phone"></div><div class="field"><label>Email</label><input id="cemail"></div><div class="field"><label>Company</label><input id="company"></div><div class="field"><label>Website</label><input id="cweb"></div></div>
+<div class="hidden" data-fields="email"><div class="field"><label>Recipient email</label><input id="email"></div><div class="field"><label>Subject</label><input id="subject"></div><div class="field"><label>Message</label><textarea id="message"></textarea></div></div>
+<hr style="border:0;border-top:1px solid #e5ebf2;margin:20px 0"><h2 class="title">Customize</h2><div class="row"><div class="field"><label>QR color</label><div class="color"><input id="fg" type="color" value="#17283d">Foreground</div></div><div class="field"><label>Background</label><div class="color"><input id="bg" type="color" value="#ffffff">Background</div></div></div>
+<div class="field"><label>Image size: <span id="sizeLabel">300 px</span></label><input id="size" type="range" min="180" max="600" step="20" value="300" style="width:100%"></div><div class="field"><label>Optional center logo</label><input id="logo" type="file" accept="image/png,image/jpeg,image/webp"><p class="hint">Choose a small square image (max 2 MB). Test scanning after adding a logo.</p></div><div class="field"><label>Quiet zone</label><select id="margin"><option value="4">Standard</option><option value="2">Compact</option><option value="8">Wide</option></select></div></section>
+<aside class="panel preview"><h2 class="title">Live Preview</h2><div class="area"><div id="placeholder">Enter content to generate a QR code.</div><canvas id="qr" class="hidden"></canvas></div><div id="status" class="status">Your QR code will appear here.</div><button id="download" class="btn primary" disabled>↓ Download PNG</button><button id="reset" class="btn secondary">Reset settings</button><p class="hint">Scan the code with your phone before sharing.</p></aside></div><footer>Free QR code generator by DigiPoint</footer></div>
+<script>
+(()=> {
+  const $=id=>document.getElementById(id);
+  const canvas=$('qr'),ctx=canvas.getContext('2d');
+  let type='url',logo=null,seq=0,logoSeq=0,logoPending=false,ready=false;
+
+  function msg(text,error=false){
+    $('status').textContent=text;
+    $('status').classList.toggle('error',error);
+  }
+
+  function hidePreview(){
+    ready=false;
+    $('download').disabled=true;
+    canvas.classList.add('hidden');
+    $('placeholder').classList.remove('hidden');
+  }
+
+  function wifiEscape(value){
+    return value.replace(/([\\;,:"])/g,'\\$1');
+  }
+
+  function vcardEscape(value){
+    return value.replace(/\\/g,'\\\\').replace(/\r\n|\r|\n/g,'\\n').replace(/([;,])/g,'\\$1');
+  }
+
+  function data(){
+    if(type==='url'){
+      const value=$('url').value.trim();
+      if(!value)return '';
+      try{
+        const url=new URL(value);
+        if(!['http:','https:'].includes(url.protocol))throw new Error();
+        return value;
+      }catch{
+        throw Error('Enter a valid URL starting with https://');
+      }
+    }
+    if(type==='text')return $('text').value.trim();
+    if(type==='wifi'){
+      const ssid=$('ssid').value,password=$('pass').value,security=$('security').value;
+      if(!ssid.trim()||(security!=='nopass'&&!password))return '';
+      return `WIFI:T:${security};S:${wifiEscape(ssid)};P:${wifiEscape(security==='nopass'?'':password)};H:${$('hiddenWifi').checked?'true':'false'};;`;
+    }
+    if(type==='contact'){
+      const name=$('name').value.trim(),phone=$('phone').value.trim(),email=$('cemail').value.trim();
+      const company=$('company').value.trim(),website=$('cweb').value.trim();
+      if(!name&&!phone&&!email&&!company&&!website)return '';
+      return [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        name?'FN:'+vcardEscape(name):'',
+        phone?'TEL:'+vcardEscape(phone):'',
+        email?'EMAIL:'+vcardEscape(email):'',
+        company?'ORG:'+vcardEscape(company):'',
+        website?'URL:'+vcardEscape(website):'',
+        'END:VCARD'
+      ].filter(Boolean).join('\r\n');
+    }
+    if(type==='email'){
+      const email=$('email').value.trim();
+      if(!email)return '';
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Enter a valid email address.');
+      return 'mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent($('subject').value)+'&body='+encodeURIComponent($('message').value);
+    }
+    return '';
+  }
+
+  async function render(statusText=null,statusError=false){
+    const request=++seq;
+    let value;
+    try{
+      value=data();
+    }catch(error){
+      hidePreview();
+      msg(error instanceof Error?error.message:'Invalid content.',true);
+      return;
+    }
+    if(!value){
+      hidePreview();
+      msg(statusText||'Enter content to generate a QR code.',statusText?statusError:false);
+      return;
+    }
+    if(!window.QRCode){
+      hidePreview();
+      msg('QR library did not load. Check your connection and reload.',true);
+      return;
+    }
+
+    ready=false;
+    $('download').disabled=true;
+    const size=+$('size').value,currentLogo=logo;
+    try{
+      const temporaryCanvas=document.createElement('canvas');
+      await QRCode.toCanvas(temporaryCanvas,value,{
+        width:size,
+        margin:+$('margin').value,
+        errorCorrectionLevel:currentLogo?'H':'M',
+        color:{dark:$('fg').value,light:$('bg').value}
+      });
+      if(request!==seq)return;
+      canvas.width=size;
+      canvas.height=size;
+      ctx.drawImage(temporaryCanvas,0,0);
+      if(currentLogo){
+        const logoSize=size*.19,padding=size*.025;
+        const x=(size-logoSize)/2,y=(size-logoSize)/2;
+        ctx.fillStyle=$('bg').value;
+        ctx.fillRect(x-padding,y-padding,logoSize+2*padding,logoSize+2*padding);
+        const scale=Math.min(logoSize/currentLogo.width,logoSize/currentLogo.height);
+        const width=currentLogo.width*scale,height=currentLogo.height*scale;
+        ctx.drawImage(currentLogo,x+(logoSize-width)/2,y+(logoSize-height)/2,width,height);
+      }
+      canvas.classList.remove('hidden');
+      $('placeholder').classList.add('hidden');
+      ready=!logoPending;
+      $('download').disabled=logoPending;
+      msg(statusText||(logoPending?'Loading selected logo...':'QR code ready. Scan it before downloading.'),statusText?statusError:false);
+    }catch(error){
+      if(request!==seq)return;
+      hidePreview();
+      const detail=error instanceof Error?`: ${error.message}`:'';
+      msg(statusText||`Could not generate this QR code${detail}`,statusText?statusError:true);
+    }
+  }
+
+  let timer;
+  function schedule(){
+    clearTimeout(timer);
+    timer=setTimeout(()=>render(),160);
+  }
+
+  document.querySelectorAll('.tab').forEach(button=>button.onclick=()=>{
+    type=button.dataset.type;
+    document.querySelectorAll('.tab').forEach(tab=>tab.classList.toggle('active',tab===button));
+    document.querySelectorAll('[data-fields]').forEach(field=>field.classList.toggle('hidden',field.dataset.fields!==type));
+    render();
+  });
+
+  document.querySelectorAll('#app input,#app textarea,#app select').forEach(input=>{
+    if(input.id!=='logo'){
+      input.addEventListener('input',schedule);
+      input.addEventListener('change',schedule);
+    }
+  });
+
+  $('size').oninput=()=>$('sizeLabel').textContent=$('size').value+' px';
+  $('logo').onchange=function(){
+    const request=++logoSeq,file=this.files&&this.files[0];
+    logo=null;
+    logoPending=false;
+    if(!file){
+      render();
+      return;
+    }
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){
+      this.value='';
+      render('Choose a PNG, JPEG, or WebP image smaller than 2 MB.',true);
+      return;
+    }
+
+    logoPending=true;
+    render();
+    const reader=new FileReader();
+    reader.onload=()=>{
+      if(request!==logoSeq)return;
+      const image=new Image();
+      image.onload=()=>{
+        if(request!==logoSeq)return;
+        logo=image;
+        logoPending=false;
+        render();
+      };
+      image.onerror=()=>{
+        if(request!==logoSeq)return;
+        this.value='';
+        logoPending=false;
+        render('Could not load that image. Choose a valid PNG, JPEG, or WebP file.',true);
+      };
+      image.src=reader.result;
+    };
+    reader.onerror=()=>{
+      if(request!==logoSeq)return;
+      this.value='';
+      logoPending=false;
+      render('Could not read that image file.',true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  $('download').onclick=()=>{
+    if(!ready)return;
+    const link=document.createElement('a');
+    link.download='digipoint-qr.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  $('reset').onclick=()=>{
+    document.querySelectorAll('#app input:not([type=checkbox]):not([type=color]):not([type=file]),#app textarea').forEach(input=>input.value='');
+    $('hiddenWifi').checked=false;
+    $('fg').value='#17283d';
+    $('bg').value='#ffffff';
+    $('size').value=300;
+    $('sizeLabel').textContent='300 px';
+    $('margin').value=4;
+    $('logo').value='';
+    logo=null;
+    logoPending=false;
+    logoSeq++;
+    document.querySelector('.tab[data-type=url]').click();
+  };
+
+  render();
+})();
+</script></body></html>
